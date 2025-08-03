@@ -7,14 +7,23 @@ use Illuminate\Http\Request;
 
 class VideoController extends Controller
 {
-    public function showByJenjang($jenjang)
+    /**
+     * Menampilkan daftar video pembelajaran berdasarkan jenjang (paket).
+     *
+     * @param  string  $paket
+     * @return \Illuminate\View\View
+     */
+    public function index($paket)
     {
-        if (!in_array($jenjang, ['sd', 'smp', 'sma'])) {
-            abort(404);
-        }
+        // Ambil semua data video yang jenjangnya sesuai dengan paket yang diakses
+        $videos = Video::where('jenjang', $paket)->latest()->get();
 
-        $videos = Video::where('jenjang', $jenjang)->get();
-        return view('video.index', compact('videos', 'jenjang'));
-
+        // Kirim data ke view 'video.index'.
+        // Variabel $paket dari URL dikirim ke view dengan nama 'jenjang'
+        // agar sesuai dengan yang diharapkan oleh file view.
+        return view('video.index', [
+            'videos' => $videos,
+            'jenjang' => $paket // <-- INI BAGIAN YANG DIPERBAIKI
+        ]);
     }
 }

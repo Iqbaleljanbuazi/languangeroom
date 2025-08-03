@@ -1,128 +1,113 @@
 @extends('layouts.app')
 
 @section('content')
-<link rel="stylesheet" href="/css/media-pembelajaran.css">
-@php
-    $paket = null;
-    $trx = \App\Models\Transaction::where('user_id', auth()->id())
-        ->where('status', 'success')
-        ->latest()
-        ->first();
-    if ($trx && $trx->paket) {
-        $paket = strtolower($trx->paket->kategori); // sd, smp, sma
-    }
-@endphp
+<link rel="stylesheet" href="{{ asset('css/media-pembelajaran.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-    .badge-jenjang {
-        display: inline-block;
-        background: linear-gradient(90deg, #2563eb 60%, #38bdf8 100%);
-        color: #fff;
-        font-size: 0.85rem;
-        font-weight: 600;
-        border-radius: 12px;
-        padding: 0.2rem 0.9rem;
-        margin-bottom: 0.7rem;
-        letter-spacing: 1px;
-        box-shadow: 0 2px 8px rgba(56,189,248,0.08);
-        transition: background 0.2s;
-    }
-    .media-card:hover .badge-jenjang {
-        background: linear-gradient(90deg, #38bdf8 60%, #2563eb 100%);
+    .hero-materi {
+        padding: 3rem 0;
+        background: url('https://www.toptal.com/designers/subtlepatterns/uploads/fancy-deboss.png');
+        border-bottom: 1px solid #eee;
     }
     .media-card {
-        border: 2px solid #f3f4f6;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     }
     .media-card:hover {
-        border-color: #2563eb;
-        box-shadow: 0 8px 32px rgba(37,99,235,0.13);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     }
+    .media-card .icon-wrapper {
+        height: 80px;
+        width: 80px;
+        margin: 0 auto 1.5rem auto;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: #fff;
+    }
+    .modul .icon-wrapper { background: linear-gradient(135deg, #22c55e, #4ade80); }
+    .video .icon-wrapper { background: linear-gradient(135deg, #f97316, #fb923c); }
+    .kuis .icon-wrapper { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+    .chatbot .icon-wrapper { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+    .media-card .media-title { font-weight: 700; font-size: 1.25rem; }
+    .media-card .media-desc { color: #6b7280; margin-bottom: 1.5rem; }
+    .media-card .media-btn {
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        color: #fff;
+        transition: background-color 0.2s;
+    }
+    .modul .media-btn { background-color: #22c55e; }
+    .video .media-btn { background-color: #f97316; }
+    .kuis .media-btn { background-color: #8b5cf6; }
+    .chatbot .media-btn { background-color: #3b82f6; }
+    .media-btn:hover { color: #fff; opacity: 0.9; }
 </style>
+
+<div class="container-fluid hero-materi">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="fw-bold" style="font-size:2.5rem; color:#111827;">Pusat Pembelajaran</h1>
+            <p class="lead" style="color:#4b5563;">Semua yang kamu butuhkan untuk jadi juara ada di sini. Ayo mulai petualangan belajarmu!</p>
+        </div>
+    </div>
+</div>
+
 <div class="container mt-5 mb-5">
-    <div class="text-center mb-4">
-        <h1 class="fw-bold" style="font-size:2.3rem; color:#2563eb;">Media Pembelajaran Interaktif</h1>
-        <p class="lead" style="color:#555;">Ayo, tingkatkan kemampuan Bahasa Inggrismu dengan berbagai fitur menarik di bawah ini!</p>
-    </div>
-
-    <!-- Modul Pembelajaran Section -->
-    <div class="mb-5">
-        <h2 class="fw-bold mb-3" style="color:#22c55e;">Modul Pembelajaran</h2>
+    @if($paket)
         <div class="media-grid">
-            @if($paket === 'sd')
-                <div class="media-card">
-                    <span class="badge-jenjang">SD</span>
-                    <div class="media-icon">📗</div>
-                    <div class="media-title">Modul SD</div>
-                    <div class="media-desc">Materi lengkap Bahasa Inggris untuk SD. Cocok untuk pemula.</div>
-                    <a href="/modul/sd" class="media-btn modul">Lihat Semua PDF</a>
-                </div>
-            @elseif($paket === 'smp')
-                <div class="media-card">
-                    <span class="badge-jenjang">SMP</span>
-                    <div class="media-icon">📘</div>
-                    <div class="media-title">Modul SMP</div>
-                    <div class="media-desc">Bahasa Inggris tingkat SMP, latihan soal dan pembahasan.</div>
-                    <a href="/modul/smp" class="media-btn modul">Lihat Semua PDF</a>
-                </div>
-            @elseif($paket === 'sma')
-                <div class="media-card">
-                    <span class="badge-jenjang">SMA</span>
-                    <div class="media-icon">📙</div>
-                    <div class="media-title">Modul SMA</div>
-                    <div class="media-desc">Persiapan ujian dan materi Bahasa Inggris SMA.</div>
-                    <a href="/modul/sma" class="media-btn modul">Lihat Semua PDF</a>
-                </div>
-            @else
-                <div class="media-card">
-                    <div class="media-title">Belum ada paket aktif</div>
-                    <div class="media-desc">Silakan hubungi admin jika Anda sudah membayar namun belum bisa mengakses modul.</div>
-                </div>
-            @endif
-        </div>
-    </div>
+            <!-- Modul Pembelajaran Card -->
+            <div class="media-card modul">
+                <div class="icon-wrapper"><i class="fas fa-book-open"></i></div>
+                <div class="media-title">Modul {{ strtoupper($paket) }}</div>
+                <div class="media-desc">Kumpulan materi & bank soal lengkap untukmu.</div>
+                <a href="{{ url('/modul/' . $paket) }}" class="media-btn">Buka Modul</a>
+            </div>
 
-    <!-- Video Pembelajaran Section -->
-    <div class="mb-5">
-        <h2 class="fw-bold mb-3" style="color:#f59e42;">Video Pembelajaran</h2>
-        <div class="media-grid">
-            @if($paket === 'sd')
-                <div class="media-card">
-                    <span class="badge-jenjang">SD</span>
-                    <div class="media-icon">🎬</div>
-                    <div class="media-title">Pengenalan Bahasa Inggris SD</div>
-                    <div class="media-desc">Video dasar-dasar Bahasa Inggris untuk SD.</div>
-                    <a href="/video/sd" class="media-btn video">Lihat Semua Video</a>
-                </div>
-            @elseif($paket === 'smp')
-                <div class="media-card">
-                    <span class="badge-jenjang">SMP</span>
-                    <div class="media-icon">🎬</div>
-                    <div class="media-title">Percakapan Sehari-hari SMP</div>
-                    <div class="media-desc">Belajar percakapan praktis untuk SMP.</div>
-                    <a href="/video/smp" class="media-btn video">Lihat Semua Video</a>
-                </div>
-            @elseif($paket === 'sma')
-                <div class="media-card">
-                    <span class="badge-jenjang">SMA</span>
-                    <div class="media-icon">🎬</div>
-                    <div class="media-title">Tips Grammar Mudah SMA</div>
-                    <div class="media-desc">Penjelasan grammar untuk SMA.</div>
-                    <a href="/video/sma" class="media-btn video">Lihat Semua Video</a>
-                </div>
-            @else
-                <div class="media-card">
-                    <div class="media-title">Belum ada paket aktif</div>
-                    <div class="media-desc">Silakan hubungi admin jika Anda sudah membayar namun belum bisa mengakses video.</div>
-                </div>
-            @endif
-        </div>
-    </div>
-      <!-- Chatbot -->
-    <div class="media-card">
-        <div class="media-icon">🤖</div>
-        <div class="media-title">Chatbot Bahasa Inggris</div>
-        <div class="media-desc">Latih speaking dan writing dengan chatbot AI yang siap menemani belajar kapan saja.</div>
-        <iframe src="/chatbot" width="100%" height="120" style="border-radius:8px; border:1px solid #eee;"></iframe>
-        <a href="/chatbot" class="media-btn chatbot mt-2">Coba Chatbot</a>
-    </div>
+            <!-- Video Pembelajaran Card -->
+            <div class="media-card video">
+                <div class="icon-wrapper"><i class="fas fa-video"></i></div>
+                <div class="media-title">Video {{ strtoupper($paket) }}</div>
+                <div class="media-desc">Tonton video penjelasan agar makin paham.</div>
+                <a href="{{ url('/video/' . $paket) }}" class="media-btn">Lihat Video</a>
+            </div>
 
+            <!-- Kuis Interaktif Card -->
+            <div class="media-card kuis">
+                <div class="icon-wrapper"><i class="fas fa-puzzle-piece"></i></div>
+                <div class="media-title">Kuis {{ strtoupper($paket) }}</div>
+                <div class="media-desc">Uji pemahamanmu dengan kuis-kuis seru.</div>
+                <a href="{{ route('quiz.list', ['paket' => $paket]) }}" class="media-btn">Mulai Kuis</a>
+            </div>
+
+            <!-- Chatbot Card -->
+            <div class="media-card chatbot">
+                <div class="icon-wrapper"><i class="fas fa-robot"></i></div>
+                <div class="media-title">AI Chatbot Tutor</div>
+                <div class="media-desc">Tanya apa saja seputar materi, kapan pun.</div>
+                <a href="/chatbot" target="_blank" class="media-btn">Tanya AI</a>
+            </div>
+        </div>
+    @else
+        {{-- Tampilan jika tidak ada paket aktif --}}
+        <div class="text-center p-5" style="background-color: #f8f9fa; border-radius: 15px;">
+            <div style="font-size: 3rem;">⚠️</div>
+            <h3 class="fw-bold mt-3">Anda Belum Memiliki Paket Aktif</h3>
+            <p class="text-muted">Untuk mengakses semua modul, video, dan kuis interaktif, silakan pilih paket belajar yang sesuai untuk Anda.</p>
+            <a href="{{ route('paket.online') }}" class="btn btn-primary btn-lg mt-3">Lihat Pilihan Paket</a>
+        </div>
+    @endif
+</div>
 @endsection

@@ -1,61 +1,101 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\PaketController;
-use App\Http\Controllers\ModulController;
 use App\Http\Controllers\Admin\ModulController as AdminModulController;
 use App\Http\Controllers\Admin\VideoController as AdminVideoController;
-use App\Http\Controllers\VideoController;
+use App\Http\Controllers\Admin\QuizController as AdminQuizController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\MateriController;
+use App\Http\Controllers\ModulController;
+use App\Http\Controllers\PaketController;
+use App\Http\Controllers\VerifikasiTransaksiController;
+use App\Http\Controllers\VideoController;
+use App\Http\Controllers\QuizController;
+use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
-});
-
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', function () {
     return view('landing.index');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
-    Route::get('/checkout/form', [CheckoutController::class, 'form'])->name('checkout.form');
-    Route::post('/bayar', [CheckoutController::class, 'bayar'])->name('checkout.bayar');
-});
-
-// Media Pembelajaran untuk user yang sudah bayar
-Route::middleware(['auth', 'sudah.bayar'])->group(function () {
-    Route::get('/materi', [MateriController::class, 'index'])->name('materi.index');
-    Route::get('/modul/{jenjang}', [ModulController::class, 'index']);
-    Route::get('/video/{jenjang}', [VideoController::class, 'showByJenjang'])->name('video.jenjang');
-});
-
-// Admin routes
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
+Route::get('/dashboard', function () {
+    if (auth()->user()->role === 'admin') {
         return view('admin.dashboard');
-    })->name('dashboard');
+    } else {
+        return view('dashboard');
+    }
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-    Route::resource('paket', PaketController::class)->except(['show']);
-    Route::resource('modul', AdminModulController::class);
-    Route::resource('video', AdminVideoController::class);
 
-    Route::get('/verifikasi-transaksi', [\App\Http\Controllers\VerifikasiTransaksiController::class, 'index'])->name('verifikasi');
-    Route::post('/verifikasi-transaksi/{id}/verifikasi', [\App\Http\Controllers\VerifikasiTransaksiController::class, 'verifikasi'])->name('verifikasi.aksi');
+// Auth routes
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+// Paket routes
+Route::get('/paket-online', [PaketController::class, 'online'])->name('paket.online');
+Route::get('/paket-offline', [PaketController::class, 'offline'])->name('paket.offline');
+
+
+// --- GRUP UNTUK PENGGUNA YANG SUDAH LOGIN ---
+Route::middleware(['auth'])->group(function () {
+    // Checkout
+    Route::get('/checkout/{id}', [CheckoutController::class, 'form'])->name('checkout.form');
+    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/payment/{id}', [CheckoutController::class, 'payment'])->name('checkout.payment');
+
+    // Halaman Materi Utama
+    Route::get('/materi', [MateriController::class, 'index'])->name('materi.index');
+
+    // Halaman Detail Materi (dilindungi middleware 'sudah.bayar')
+    Route::get('/modul/{paket}', [ModulController::class, 'index'])->name('modul.index')->middleware('sudah.bayar');
+    Route::get('/video/{paket}', [VideoController::class, 'index'])->name('video.index')->middleware('sudah.bayar');
+    Route::get('/quiz/{paket}', [QuizController::class, 'index'])->name('quiz.list')->middleware('sudah.bayar'); // <-- Diubah di sini
 });
 
-Route::get('/paket/paket-offline', [PaketController::class, 'showOffline']);
-Route::get('/paket/paket-online', [PaketController::class, 'showOnline']);
 
-Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
-    Route::resource('paket', PaketController::class);
+// --- GRUP KHUSUS UNTUK ADMIN ---
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+
+    // Admin Paket
+    Route::get('/admin/paket', [PaketController::class, 'index'])->name('admin.paket.index');
+    // ... (route paket lainnya)
+
+    // Admin Verifikasi
+    Route::get('/admin/verifikasi', [VerifikasiTransaksiController::class, 'index'])->name('admin.verifikasi');
+    Route::post('/admin/verifikasi/{id}', [VerifikasiTransaksiController::class, 'verify'])->name('admin.verifikasi.verify');
+
+    // Admin Modul
+    Route::resource('admin/modul', AdminModulController::class)->names([
+        'index' => 'admin.modul.index',
+        'create' => 'admin.modul.create',
+        'store' => 'admin.modul.store',
+        'edit' => 'admin.modul.edit',
+        'update' => 'admin.modul.update',
+        'destroy' => 'admin.modul.destroy',
+    ]);
+
+    // Admin Video
+    Route::resource('admin/video', AdminVideoController::class)->names([
+        'index' => 'admin.video.index',
+        'create' => 'admin.video.create',
+        'store' => 'admin.video.store',
+        'edit' => 'admin.video.edit',
+        'update' => 'admin.video.update',
+        'destroy' => 'admin.video.destroy',
+    ]);
+
+    // Admin Kuis (CRUD untuk admin)
+    Route::resource('quiz', AdminQuizController::class)->except(['show']);
 });
