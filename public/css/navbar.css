@@ -1,0 +1,34 @@
+/* Memberi jarak di atas body karena navbar fixed-top */
+body {
+    padding-top: 70px; 
+    background-color: #f8f9fa; /* Warna latar belakang body sedikit abu-abu */
+}
+
+.navbar {
+    transition: background-color 0.3s ease-in-out;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: #0d6efd !important; /* Warna biru primer untuk brand */
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #0d6efd !important; /* Warna biru saat hover atau aktif */
+}
+
+.btn-logout {
+    background: none;
+    border: none;
+    color: var(--bs-nav-link-color);
+    padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
+}
+
+.btn-logout:hover {
+    color: #0d6efd !important;
+}
